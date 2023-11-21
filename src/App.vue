@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="app">
         <router-view />
         <div class="authors">
             Authors: <span class="authors__item">Daniel Kolesnyk</span>,
@@ -25,6 +25,10 @@
 .authors__item {
     font-weight: 600;
     color: #ababab;
+}
+
+.app {
+    height: 100%;
 }
 </style>
 <script setup lang="ts"></script>

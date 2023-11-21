@@ -1,38 +1,35 @@
 <template>
     <div class="wrapper">
         <div class="box">
-            <a class="waves-effect waves-light btn">button</a>
-            <form class="form">
+            <form class="form" @submit="onSubmit">
                 <div class="input-field col s12">
-                    <input id="email" type="email" class="validate" />
-                    <label for="email">Email</label>
+                    <input
+                        v-model="form.email"
+                        id="email"
+                        type="email"
+                        class="validate"
+                        :class="{ invalid: !isValid }" />
+                    <label :class="{ active: form.email }" for="email">Email</label>
+                </div>
+                <div class="input-field col s12">
+                    <input
+                        :class="{ invalid: !isValid }"
+                        v-model="form.password"
+                        id="password"
+                        type="password"
+                        class="validate" />
+                    <label :class="{ active: form.password }" for="password">Password</label>
+                </div>
+
+                <button class="btn waves-effect waves-light" type="submit">
+                    sing in
+
+                    <i class="material-icons right">send</i>
+                </button>
+                <div v-if="isLoading" class="progress">
+                    <div class="indeterminate"></div>
                 </div>
             </form>
-            <b-form class="form" @submit="onSubmit">
-                <b-form-group class="input__box" id="input-group-1" label="Email address:" label-for="input-1">
-                    <b-form-input
-                        id="input-1"
-                        :state="isValid"
-                        v-model="form.email"
-                        type="email"
-                        placeholder="Enter email"
-                        required></b-form-input>
-                </b-form-group>
-
-                <b-form-group class="input__box" id="input-group-2" label="Password:" label-for="input-2">
-                    <b-form-input
-                        id="input-2"
-                        :state="isValid"
-                        v-model="form.password"
-                        type="password"
-                        placeholder="Enter password"
-                        required></b-form-input>
-                </b-form-group>
-                <b-button type="submit" :variant="'outline-success'">
-                    <b-spinner v-if="isLoading" small></b-spinner>
-                    Submit
-                </b-button>
-            </b-form>
         </div>
     </div>
 </template>
@@ -47,28 +44,29 @@ type data = {
         password: string;
     };
     isLoading: boolean;
-    isValid: boolean | null;
+    isValid: boolean;
 };
 export default defineComponent({
     name: 'Auth',
     data: (): data => ({
         form: {
-            email: 'test2@gmail.com',
+            email: 'alex@gmail.com',
             password: 'testtest'
         },
         isLoading: false,
-        isValid: null
+        isValid: true
     }),
     methods: {
         ...mapActions(['setUserToken']),
         async onSubmit(event: Event): Promise<any> {
+            event.preventDefault();
+            this.isValid = true;
             this.isLoading = true;
             const userToken = await fireBase.logIn(this.form.email, this.form.password);
             if (!userToken) {
                 this.isValid = false;
             }
             if (userToken) {
-                this.isValid = true;
                 this.$router.push('home');
                 this.setUserToken(userToken);
             }
@@ -99,6 +97,9 @@ export default defineComponent({
     display: flex;
     align-items: center;
     flex-direction: column;
+    input {
+        color: #fff;
+    }
 }
 
 .input__box {
