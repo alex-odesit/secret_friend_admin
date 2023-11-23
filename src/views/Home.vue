@@ -7,52 +7,57 @@
                     {{ index + 1 }}
                 </div>
                 <div class="user__edit user__node">
-                    <b-button
-                        v-if="index != edit"
+                    <a
                         @click="editPlayer(index)"
-                        class="user__node user__edit"
-                        style="font-size: 20px; line-height: 25px"
-                        variant="success"
-                        ><font-awesome-icon icon="fa-solid fa-pen-to-square"
-                    /></b-button>
-                    <b-button
-                        v-if="index == edit"
+                        v-if="index != edit"
+                        class="btn-floating btn-small waves-effect waves-light green"
+                        ><i class="material-icons">edit</i></a
+                    >
+                    <a
                         @click="editPlayer(null)"
-                        class="user__node user__edit"
-                        style="font-size: 20px; line-height: 25px"
-                        variant="success"
-                        >Save</b-button
+                        v-if="index == edit"
+                        class="btn-floating btn-small waves-effect waves-light purple darken-4 pulse"
+                        ><i class="material-icons">save</i></a
                     >
                 </div>
 
                 <div class="user__name user__node">
-                    <b-form-input
-                        :disabled="index != edit"
-                        v-model="user.fullName"
-                        placeholder="Enter name"></b-form-input>
+                    <div class="input-field">
+                        <input v-model="user.fullName" id="first_name" type="text" class="validate white-text" />
+                        <label class="green-text" :class="{ active: user.fullName }" for="first_name">First Name</label>
+                    </div>
                 </div>
                 <div class="user__preferences user__node">
-                    <b-form-textarea
-                        :disabled="index != edit"
-                        no-resize
-                        v-model="user.givesWish"
-                        placeholder="Enter preference..."></b-form-textarea>
+                    <div class="input-field">
+                        <textarea
+                            v-model="user.givesWish"
+                            id="textarea1"
+                            class="materialize-textarea white-text"></textarea>
+                        <label class="green-text" :class="{ active: user.givesWish }" for="textarea1">Textarea</label>
+                    </div>
                 </div>
                 <div class="user__unique user__node">
-                    <b-form-checkbox
-                        :disabled="index != edit"
-                        style="margin-left: 0; padding-left: 0"
-                        size="lg"></b-form-checkbox>
+                    <div class="input-field">
+                        <select v-model="user.exceptionNames" multiple>
+                            <option
+                                v-for="userName in getUsersName.filter(userName => user.fullName !== userName)"
+                                :key="userName"
+                                :value="userName">
+                                {{ userName }}
+                            </option>
+                        </select>
+                        <label>Materialize Multiple Select</label>
+                    </div>
                 </div>
                 <div v-if="user.password" class="user__password user__node">{{ user.password }}</div>
                 <div v-if="!user.password" class="user__password user__node user__password_not-generated">
                     not generated
                 </div>
+
                 <div v-if="user.targetName" class="user__node user__tooltip">
-                    <div class="user__tooltip_box">
-                        <div class="user__tooltip_shower">{{ user.targetName }}</div>
-                        <font-awesome-icon :icon="['fas', 'eye']" />
-                    </div>
+                    <i class="material-icons tooltipped" data-position="left" data-tooltip="I am a tooltip"
+                        >remove_red_eye</i
+                    >
                 </div>
             </div>
             <b-form class="form" @submit="addNewUser">
@@ -77,7 +82,7 @@
                             v-model="newUser.givesWish"
                             placeholder="Enter preference..."></b-form-textarea>
                     </div>
-                    <div class="user__unique user__node">
+                    <div class="user__node user__unique">
                         <b-form-checkbox
                             style="margin-left: 0; padding-left: 0"
                             v-model="newUser"
@@ -91,6 +96,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
+// @ts-ignore
+import M from 'materialize-css';
 
 type userItem = {
     fullName: string;
@@ -107,6 +114,8 @@ type data = {
     users: userItem[];
     newUser: userItem;
     edit: number | null;
+    test?: any;
+    selected?: any;
 };
 
 export default defineComponent({
@@ -114,13 +123,33 @@ export default defineComponent({
     data: (): data => ({
         users: [
             {
-                fullName: 'Test 1',
+                fullName: 'Alex',
                 givesWish: 'iphone',
                 exceptionNames: [],
                 password: 'kjnk',
-                targetName: '',
+                targetName: 'test',
                 targetWish: '',
                 id: 0,
+                targetPlayerId: 1
+            },
+            {
+                fullName: 'Ann',
+                givesWish: 'iphone2',
+                exceptionNames: [],
+                password: 'kjnkdvs',
+                targetName: 'test2',
+                targetWish: '',
+                id: 1,
+                targetPlayerId: 1
+            },
+            {
+                fullName: 'Danya',
+                givesWish: 'iphone3',
+                exceptionNames: [],
+                password: '',
+                targetName: '',
+                targetWish: '',
+                id: 1,
                 targetPlayerId: 1
             }
         ],
@@ -161,10 +190,17 @@ export default defineComponent({
         }
     },
     computed: {
-        ...mapGetters(['getUserToken'])
+        ...mapGetters(['getUserToken']),
+        getUsersName(): string[] {
+            return this.users.map(user => user.fullName);
+        }
     },
     mounted() {
-        // if (!this.getUserToken) this.$router.push('/');
+        // if (!this.getUserToken) {
+        //     this.$router.push('/');
+        //     return
+        // }
+        M.AutoInit();
     }
 });
 </script>
@@ -208,19 +244,12 @@ export default defineComponent({
 }
 
 .user__preferences {
-    textarea {
-        height: 50px;
-    }
-    flex: 0 0 50%;
+    flex: 0 0 40%;
 }
 
 .user__unique {
-    flex: 0 0 10%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    flex: 0 0 20%;
 }
-
 .user__password {
     text-align: center;
     flex: 0 0 10%;
@@ -231,6 +260,9 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     position: relative;
+    i {
+        cursor: pointer;
+    }
 }
 
 .user__tooltip_box {

@@ -30,5 +30,33 @@
 .app {
     height: 100%;
 }
+
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+    background-color: black;
+}
+#app {
+    height: 100%;
+}
+input.select-dropdown {
+    color: white;
+    font-size: 12px !important;
+}
+
+.dropdown-content li > a,
+.dropdown-content li > span {
+    padding: 8px 10px !important;
+}
+
+.dropdown-content li {
+    min-height: auto !important;
+}
+
+.select-wrapper .caret {
+    fill: white !important;
+}
 </style>
-<script setup lang="ts"></script>
+<script lang="ts"></script>

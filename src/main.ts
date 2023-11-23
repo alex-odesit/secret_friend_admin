@@ -5,7 +5,6 @@ import store from './store';
 import 'materialize-css/dist/css/materialize.min.css';
 import 'materialize-css/dist/js/materialize.min.js';
 import { fireBase } from '@/network/fireBase';
-
 fireBase.initialize();
 
 createApp(App).use(store).use(router).mount('#app');
