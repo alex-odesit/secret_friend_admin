@@ -60,6 +60,7 @@ export default defineComponent({
         ...mapActions(['setUserToken']),
         async onSubmit(event: Event): Promise<any> {
             event.preventDefault();
+            if (this.isLoading) return;
             this.isValid = true;
             this.isLoading = true;
             const userToken = await fireBase.logIn(this.form.email, this.form.password);

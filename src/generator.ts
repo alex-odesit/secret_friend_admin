@@ -8,8 +8,8 @@ const randomPlayer = (array: Player[], except: string[]) => {
 
     do {
         player = array[Math.floor(Math.random() * array.length)];
+        if (array.length === except.length) throw new Error('The player has no target players');
     } while (except.includes(player.fullName));
-
     return player;
 };
 
@@ -18,7 +18,7 @@ export class Generator {
 
     constructor(...players: Player[]) {
         this._players = players.map(player => {
-            player.password ??= uid.randomUUID().toLowerCase();
+            player.password ||= uid.randomUUID().toLowerCase();
             player.exceptionNames ??= [];
 
             return player;
@@ -57,35 +57,43 @@ export class Generator {
      * @return [player, targetPlayer][]
      */
     getGameResult(): Player[] {
-        const participants: Player[] = [];
-        const distributed: string[] = [];
+        try {
+            const participants: Player[] = [];
+            const distributed: string[] = [];
 
-        this._players.sort((p1, p2) => p2.exceptionNames.length - p1.exceptionNames.length);
-        for (let i = 0; i < this._players.length; i++) {
-            const player = this._players[i];
-            const targetPlayer = randomPlayer(this._players, [
-                player.fullName,
-                ...distributed,
-                ...player.exceptionNames
-            ]);
-            distributed.push(targetPlayer.fullName);
+            this._players.sort((p1, p2) => p2.exceptionNames.length - p1.exceptionNames.length);
 
-            player.targetPlayerId = targetPlayer.id;
-            participants.push(player);
+            for (let i = 0; i < this._players.length; i++) {
+                const player = this._players[i];
+                const targetPlayer = randomPlayer(
+                    this._players,
+                    [player.fullName, ...distributed, ...player.exceptionNames].filter(
+                        (item, index, array) => array.indexOf(item) === index
+                    )
+                );
+                distributed.push(targetPlayer.fullName);
+
+                player.targetPlayerName = targetPlayer.fullName;
+                player.targetWish = targetPlayer.givesWish;
+                participants.push(player);
+            }
+
+            return participants;
+        } catch (e) {
+            return this.getGameResult();
         }
-        return participants;
     }
 
     get players(): Player[] {
         return this._players;
     }
 }
-
 export interface Player {
-    id: number;
     fullName: string;
-    givesWish?: string;
-    password: string;
+    givesWish: string;
     exceptionNames: string[];
-    targetPlayerId?: number;
+    password: string;
+    id: number;
+    targetWish: string;
+    targetPlayerName: string;
 }

@@ -58,5 +58,13 @@ input.select-dropdown {
 .select-wrapper .caret {
     fill: white !important;
 }
+
+.select-wrapper input.select-dropdown {
+    margin-bottom: 23px !important;
+}
+
+.opacity0 {
+    opacity: 0;
+}
 </style>
 <script lang="ts"></script>

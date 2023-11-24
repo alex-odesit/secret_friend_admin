@@ -2,94 +2,110 @@
     <div class="wrapper">
         <div class="users">
             <div class="users__labels"></div>
-            <div v-for="(user, index) in users" :key="index" class="user__item user__row">
+            <div v-for="(player, index) in players" :key="index" class="user__item user__row">
                 <div class="user__node user__count">
                     {{ index + 1 }}
                 </div>
-                <div class="user__edit user__node">
-                    <a
-                        @click="editPlayer(index)"
-                        v-if="index != edit"
-                        class="btn-floating btn-small waves-effect waves-light green"
-                        ><i class="material-icons">edit</i></a
-                    >
-                    <a
-                        @click="editPlayer(null)"
-                        v-if="index == edit"
-                        class="btn-floating btn-small waves-effect waves-light purple darken-4 pulse"
-                        ><i class="material-icons">save</i></a
+                <div class="user__remove user__node">
+                    <a @click="removePlayer(index)" class="btn-floating btn-small waves-effect waves-light green"
+                        ><i class="material-icons red">remove_circle_outline </i></a
                     >
                 </div>
 
                 <div class="user__name user__node">
                     <div class="input-field">
-                        <input v-model="user.fullName" id="first_name" type="text" class="validate white-text" />
-                        <label class="green-text" :class="{ active: user.fullName }" for="first_name">First Name</label>
+                        <input v-model="player.fullName" id="first_name" type="text" class="validate white-text" />
+                        <label class="green-text" :class="{ active: player.fullName }" for="first_name"
+                            >First Name</label
+                        >
                     </div>
                 </div>
                 <div class="user__preferences user__node">
                     <div class="input-field">
                         <textarea
-                            v-model="user.givesWish"
+                            v-model="player.givesWish"
                             id="textarea1"
                             class="materialize-textarea white-text"></textarea>
-                        <label class="green-text" :class="{ active: user.givesWish }" for="textarea1">Textarea</label>
+                        <label class="green-text" :class="{ active: player.givesWish }" for="textarea1">Wish</label>
                     </div>
                 </div>
                 <div class="user__unique user__node">
                     <div class="input-field">
-                        <select v-model="user.exceptionNames" multiple>
+                        <select v-model="player.exceptionNames" multiple>
                             <option
-                                v-for="userName in getUsersName.filter(userName => user.fullName !== userName)"
+                                v-for="userName in getUsersName.filter(payerName => player.fullName !== payerName)"
                                 :key="userName"
                                 :value="userName">
                                 {{ userName }}
                             </option>
                         </select>
-                        <label>Materialize Multiple Select</label>
+                        <label>Exception</label>
                     </div>
                 </div>
-                <div v-if="user.password" class="user__password user__node">{{ user.password }}</div>
-                <div v-if="!user.password" class="user__password user__node user__password_not-generated">
+                <div v-if="player.password" class="user__password user__node">{{ player.password }}</div>
+                <div v-if="!player.password" class="user__password user__node user__password_not-generated">
                     not generated
                 </div>
 
-                <div v-if="user.targetName" class="user__node user__tooltip">
-                    <i class="material-icons tooltipped" data-position="left" data-tooltip="I am a tooltip"
+                <div v-if="player.targetPlayerName" class="user__node user__tooltip">
+                    <i class="material-icons tooltipped" data-position="left" :data-tooltip="player.targetPlayerName"
                         >remove_red_eye</i
                     >
                 </div>
             </div>
-            <b-form class="form" @submit="addNewUser">
+            <form class="form" @submit="addNewUser">
                 <div class="user__row">
                     <div class="user__node user__count"></div>
-                    <div class="user__edit user__node">
-                        <b-button
-                            class="user__node user__edit"
-                            type="submit"
-                            style="font-size: 20px; line-height: 25px"
-                            variant="success"
-                            ><font-awesome-icon :icon="['fas', 'plus']"
-                        /></b-button>
+                    <div
+                        :class="{ opacity0: !newPlayer.fullName || !newPlayer.givesWish }"
+                        class="user__remove user__node">
+                        <button type="submit" class="btn-floating btn-small">
+                            <i class="material-icons green">add </i>
+                        </button>
                     </div>
                     <div class="user__name user__node">
-                        <b-form-input required v-model="newUser.fullName" placeholder="Enter name"></b-form-input>
+                        <div class="input-field">
+                            <input v-model="newPlayer.fullName" id="new_name" type="text" class="validate white-text" />
+                            <label class="green-text" :class="{ active: newPlayer.fullName }" for="new_name"
+                                >First Name</label
+                            >
+                        </div>
                     </div>
                     <div class="user__preferences user__node">
-                        <b-form-textarea
-                            required
-                            no-resize
-                            v-model="newUser.givesWish"
-                            placeholder="Enter preference..."></b-form-textarea>
+                        <div class="input-field">
+                            <textarea
+                                v-model="newPlayer.givesWish"
+                                id="new_wish"
+                                class="materialize-textarea white-text"></textarea>
+                            <label class="green-text" :class="{ active: newPlayer.givesWish }" for="new_wish"
+                                >Textarea</label
+                            >
+                        </div>
                     </div>
-                    <div class="user__node user__unique">
-                        <b-form-checkbox
-                            style="margin-left: 0; padding-left: 0"
-                            v-model="newUser"
-                            size="lg"></b-form-checkbox>
+                    <div class="user__unique user__node">
+                        <div class="input-field">
+                            <select v-model="newPlayer.exceptionNames" multiple>
+                                <option v-for="userName in getUsersName" :key="userName" :value="userName">
+                                    {{ userName }}
+                                </option>
+                            </select>
+                            <label>Exception</label>
+                        </div>
                     </div>
                 </div>
-            </b-form>
+            </form>
+            <div class="generate__box">
+                <div>
+                    <button class="btn__wave_box" @click="generate">
+                        <span class="btn__wave"></span>
+                        <span class="btn__text">generate</span>
+                    </button>
+                </div>
+
+                <div v-if="isGenerate" class="progress">
+                    <div class="indeterminate"></div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -98,101 +114,91 @@ import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 // @ts-ignore
 import M from 'materialize-css';
-
-type userItem = {
-    fullName: string;
-    givesWish: string;
-    exceptionNames: string[];
-    password: string;
-    id: number;
-    targetName: string;
-    targetWish: string;
-    targetPlayerId: number | null;
-};
+import { Generator, Player } from '@/generator';
 
 type data = {
-    users: userItem[];
-    newUser: userItem;
-    edit: number | null;
-    test?: any;
-    selected?: any;
+    players: Player[];
+    newPlayer: Player;
+    isGenerate: boolean;
 };
 
 export default defineComponent({
     name: 'Home',
     data: (): data => ({
-        users: [
+        isGenerate: false,
+        players: [
             {
                 fullName: 'Alex',
                 givesWish: 'iphone',
                 exceptionNames: [],
                 password: 'kjnk',
-                targetName: 'test',
                 targetWish: '',
                 id: 0,
-                targetPlayerId: 1
+                targetPlayerName: ''
             },
             {
                 fullName: 'Ann',
                 givesWish: 'iphone2',
                 exceptionNames: [],
                 password: 'kjnkdvs',
-                targetName: 'test2',
                 targetWish: '',
                 id: 1,
-                targetPlayerId: 1
+                targetPlayerName: ''
             },
             {
                 fullName: 'Danya',
                 givesWish: 'iphone3',
                 exceptionNames: [],
                 password: '',
-                targetName: '',
                 targetWish: '',
-                id: 1,
-                targetPlayerId: 1
+                id: 2,
+                targetPlayerName: ''
             }
         ],
-        newUser: {
+        newPlayer: {
             fullName: '',
             givesWish: '',
             exceptionNames: [],
             password: '',
-            targetName: '',
             targetWish: '',
             id: 0,
-            targetPlayerId: null
-        },
-        edit: null
+            targetPlayerName: ''
+        }
     }),
     methods: {
         addNewUser(event: Event): void {
             event.preventDefault();
-            this.users.push({
-                fullName: this.newUser.fullName,
-                givesWish: this.newUser.givesWish,
-                exceptionNames: [],
-                password: '',
-                id: !this.users.length ? 0 : this.users[this.users.length - 1].id,
-                targetPlayerId: null,
-                targetName: '',
-                targetWish: ''
-            });
+            this.newPlayer.id = !this.players.length ? 0 : this.players[this.players.length - 1].id + 1;
+            this.players.push(JSON.parse(JSON.stringify(this.newPlayer)));
             this.resetNewPlayer();
+            this.updateView();
         },
         resetNewPlayer(): void {
-            this.newUser.fullName = '';
-            this.newUser.givesWish = '';
-            this.newUser.exceptionNames = [];
+            this.newPlayer.fullName = '';
+            this.newPlayer.givesWish = '';
+            this.newPlayer.exceptionNames = [];
         },
-        editPlayer(index: number | null): void {
-            this.edit = index;
+        removePlayer(index: number): void {
+            this.players.splice(index, 1);
+            this.updateView();
+        },
+        async generate(): Promise<any> {
+            if (this.isGenerate) return;
+            this.isGenerate = true;
+            const generator = new Generator(...JSON.parse(JSON.stringify(this.players)));
+            this.players = generator.getGameResult().sort((a, b) => a.id - b.id);
+
+            this.isGenerate = false;
+            this.updateView();
+        },
+        updateView(): void {
+            setTimeout(M.AutoInit, 0);
         }
     },
     computed: {
         ...mapGetters(['getUserToken']),
         getUsersName(): string[] {
-            return this.users.map(user => user.fullName);
+            return this.players.map(player => player.fullName);
         }
     },
     mounted() {
@@ -206,6 +212,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+$size: 200px;
+
 .wrapper {
     background-color: #282828;
     height: 100%;
@@ -232,11 +240,14 @@ export default defineComponent({
     flex: 0 0 2%;
 }
 
-.user__edit {
+.user__remove {
     flex: 0 0 3%;
     padding: 5px;
     display: flex;
     justify-content: center;
+    i {
+        font-size: 22px;
+    }
 }
 
 .user__name {
@@ -245,6 +256,9 @@ export default defineComponent({
 
 .user__preferences {
     flex: 0 0 40%;
+    textarea {
+        margin-bottom: 1px;
+    }
 }
 
 .user__unique {
@@ -289,5 +303,80 @@ export default defineComponent({
 
 .user__password_not-generated {
     color: red;
+}
+
+.generate__box {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.btn__wave_box {
+    font-family: 'Patrick Hand', sans-serif;
+    font-size: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 15px 25px;
+    width: $size;
+    font-weight: 600;
+    color: #fff;
+    background-color: transparent;
+    border: none;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+
+    &:hover {
+        .btn__wave {
+            top: -150px;
+        }
+    }
+
+    & .btn__text {
+        position: relative;
+    }
+    & .btn__wave {
+        display: block;
+        position: absolute;
+        top: -100px;
+        left: 0;
+        width: $size;
+        height: $size;
+        background: linear-gradient(45deg, #4f00bc, #29abe2);
+        transition: 0.5s ease;
+
+        &:after,
+        &:before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -75%);
+        }
+
+        &:after {
+            border-radius: 40%;
+            background-color: rgba(#333, 0.5);
+            animation: wave 7s linear infinite;
+        }
+        &:before {
+            border-radius: 45%;
+            background-color: rgba(#333, 1);
+            animation: wave 12s linear infinite;
+        }
+    }
+}
+
+@keyframes wave {
+    0% {
+        transform: translate(-50%, -75%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -75%) rotate(360deg);
+    }
 }
 </style>
