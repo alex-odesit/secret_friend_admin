@@ -115,6 +115,7 @@ import { mapGetters } from 'vuex';
 // @ts-ignore
 import M from 'materialize-css';
 import { Generator, Player } from '@/generator';
+import { fireBase } from '@/network/fireBase';
 
 type data = {
     players: Player[];
@@ -187,7 +188,7 @@ export default defineComponent({
             this.isGenerate = true;
             const generator = new Generator(...JSON.parse(JSON.stringify(this.players)));
             this.players = generator.getGameResult().sort((a, b) => a.id - b.id);
-
+            await fireBase.post(this.players, 'players/');
             this.isGenerate = false;
             this.updateView();
         },
@@ -202,10 +203,10 @@ export default defineComponent({
         }
     },
     mounted() {
-        // if (!this.getUserToken) {
-        //     this.$router.push('/');
-        //     return
-        // }
+        if (!this.getUserToken) {
+            this.$router.push('/');
+            return;
+        }
         M.AutoInit();
     }
 });
