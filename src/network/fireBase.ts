@@ -1,6 +1,7 @@
 import { initializeApp, FirebaseApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, UserCredential } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { getDatabase, ref, set, Database, get, child } from 'firebase/database';
+import { Utils } from '@/utils/utils';
 
 class FireBase {
     private _app: FirebaseApp;
@@ -20,7 +21,10 @@ class FireBase {
     }
     async post(data: any, path: string = ''): Promise<any> {
         try {
-            await set(ref(this._database, `users/${this._playerId}/${path}`), JSON.stringify(data));
+            await set(
+                ref(this._database, `users/${this._playerId}/${path}`),
+                Utils.encryptSubstitution(JSON.stringify(data))
+            );
         } catch (err) {
             console.error(err);
             throw 'Data not sending';
@@ -30,7 +34,9 @@ class FireBase {
     async get(key: string): Promise<any> {
         try {
             const parent = ref(this._database);
-            return JSON.parse((await get(child(parent, `users/${this._playerId}/${key}`))).val());
+            return JSON.parse(
+                Utils.decryptSubstitution((await get(child(parent, `users/${this._playerId}/${key}`))).val())
+            );
         } catch (err) {
             console.error('Data not defined');
             console.error(err);

@@ -12,6 +12,28 @@ class Utils {
         if (data) return JSON.parse(data);
         return false;
     }
+
+    static encryptSubstitution(str: string) {
+        // Пример простого шифра подстановки
+        const alphabet: string = 'abcdefghijklmnopqrstuvwxyz';
+        const encryptedChars: string = 'xyzabcdefghijklmnopqrstuvw';
+
+        return str.replace(/[a-z]/g, char => {
+            const index = alphabet.indexOf(char);
+            return index >= 0 ? encryptedChars[index] : char;
+        });
+    }
+
+    static decryptSubstitution(str: string) {
+        // Пример дешифра подстановки
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+        const encryptedChars = 'xyzabcdefghijklmnopqrstuvw';
+
+        return str.replace(/[a-z]/g, char => {
+            const index = encryptedChars.indexOf(char);
+            return index >= 0 ? alphabet[index] : char;
+        });
+    }
 }
 
 export { Utils };
