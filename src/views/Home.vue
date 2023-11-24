@@ -1,5 +1,6 @@
 <template>
     <div class="wrapper">
+        <Preloader v-if="!isLoadData" />
         <div class="users">
             <div class="users__labels"></div>
             <div v-for="(player, index) in players" :key="index" class="user__item user__row">
@@ -42,7 +43,14 @@
                         <label>Exception</label>
                     </div>
                 </div>
-                <div v-if="player.password" class="user__password user__node">{{ player.password }}</div>
+                <div
+                    v-if="player.password"
+                    @click="copy(player.password)"
+                    class="user__password user__node tooltipped"
+                    data-position="bottom"
+                    data-tooltip="COPY">
+                    {{ player.password }}
+                </div>
                 <div v-if="!player.password" class="user__password user__node user__password_not-generated">
                     not generated
                 </div>
@@ -94,16 +102,19 @@
                     </div>
                 </div>
             </form>
-            <div class="generate__box">
-                <div>
+            <div class="generate__wrapper">
+                <div class="generate__box">
                     <button class="btn__wave_box" @click="generate">
                         <span class="btn__wave"></span>
                         <span class="btn__text">generate</span>
                     </button>
-                </div>
-
-                <div v-if="isGenerate" class="progress">
-                    <div class="indeterminate"></div>
+                    <button v-if="isNeedReset" class="btn__wave_box btn__wave_box-reset" @click="reset">
+                        <span class="btn__wave"></span>
+                        <span class="btn__text">reset</span>
+                    </button>
+                    <div v-if="isGenerate" class="progress">
+                        <div class="indeterminate"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -113,24 +124,28 @@
 import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 // @ts-ignore
-import M from 'materialize-css';
+import M, { ToastOptions } from 'materialize-css';
 import { Generator, Player } from '@/generator';
 import { fireBase } from '@/network/fireBase';
 import { Utils } from '@/utils/utils';
+import Preloader from '@/components/Preloader.vue';
 
 type data = {
     players: Player[];
-    serverData: Player[];
+    serverPlayers: Player[];
     newPlayer: Player;
     isGenerate: boolean;
+    isLoadData: boolean;
 };
 
 export default defineComponent({
     name: 'Home',
+    components: { Preloader },
     data: (): data => ({
         isGenerate: false,
         players: [],
-        serverData: [],
+        serverPlayers: [],
+        isLoadData: false,
         newPlayer: {
             fullName: '',
             givesWish: '',
@@ -167,30 +182,47 @@ export default defineComponent({
             this.updateView();
         },
         async generate(): Promise<any> {
-            if (this.isGenerate) return;
+            if (this.isGenerate || !this.isNeedReset) return;
             this.isGenerate = true;
             const generator = new Generator(...JSON.parse(JSON.stringify(this.players)));
             this.players = generator.getGameResult().sort((a, b) => a.id - b.id);
             await fireBase.post(this.players, 'players/');
             this.isGenerate = false;
+            this.serverPlayers = JSON.parse(JSON.stringify(this.players));
+            this.updateView();
+        },
+        reset(): void {
+            this.players = JSON.parse(JSON.stringify(this.serverPlayers));
             this.updateView();
         },
         updateView(): void {
             setTimeout(M.AutoInit, 0);
         },
+        async copy(data: string): Promise<any> {
+            await navigator.clipboard.writeText(data);
+            // @ts-ignore
+            this.showToast('Coped', { displayLength: 500, inDuration: 150, outDuration: 150 });
+        },
+        showToast(data: string, options?: ToastOptions): void {
+            M.toast({ html: data, ...options, classes: 'rounded red' });
+        },
         async loadData(): Promise<any> {
             const serverPlayers = await fireBase.get('players');
-            if (serverPlayers) this.serverData = JSON.parse(JSON.stringify(serverPlayers));
+            if (serverPlayers) this.serverPlayers = JSON.parse(JSON.stringify(serverPlayers));
             const localPlayers = Utils.getLocalStorage('players');
             if (localPlayers) this.players = JSON.parse(JSON.stringify(localPlayers));
             if (serverPlayers && !localPlayers) this.players = JSON.parse(JSON.stringify(localPlayers));
             this.updateView();
+            this.isLoadData = true;
         }
     },
     computed: {
         ...mapGetters(['getUserToken']),
         getUsersName(): string[] {
             return this.players.map(player => player.fullName);
+        },
+        isNeedReset(): boolean {
+            return JSON.stringify(this.players) !== JSON.stringify(this.serverPlayers);
         }
     },
     mounted() {
@@ -259,6 +291,8 @@ $size: 200px;
 .user__password {
     text-align: center;
     flex: 0 0 10%;
+    border: 1px dashed white;
+    cursor: pointer;
 }
 
 .user__tooltip {
@@ -297,11 +331,12 @@ $size: 200px;
     color: red;
 }
 
-.generate__box {
-    width: 200px;
+.generate__wrapper {
     display: flex;
-    flex-direction: column;
     justify-content: center;
+}
+
+.generate__box {
 }
 
 .btn__wave_box {
@@ -360,6 +395,12 @@ $size: 200px;
             background-color: rgba(#333, 1);
             animation: wave 12s linear infinite;
         }
+    }
+}
+
+.btn__wave_box-reset {
+    & .btn__wave {
+        background: linear-gradient(45deg, #bc0000, #d029e2);
     }
 }
 

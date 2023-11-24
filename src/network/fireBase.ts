@@ -20,7 +20,7 @@ class FireBase {
     }
     async post(data: any, path: string = ''): Promise<any> {
         try {
-            await set(ref(this._database, `users/${this._playerId}/${path}`), data);
+            await set(ref(this._database, `users/${this._playerId}/${path}`), JSON.stringify(data));
         } catch (err) {
             console.error(err);
             throw 'Data not sending';
@@ -30,7 +30,7 @@ class FireBase {
     async get(key: string): Promise<any> {
         try {
             const parent = ref(this._database);
-            return (await get(child(parent, `users/${this._playerId}/${key}`))).val();
+            return JSON.parse((await get(child(parent, `users/${this._playerId}/${key}`))).val());
         } catch (err) {
             console.error('Data not defined');
             console.error(err);
