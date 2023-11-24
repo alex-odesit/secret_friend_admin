@@ -116,9 +116,11 @@ import { mapGetters } from 'vuex';
 import M from 'materialize-css';
 import { Generator, Player } from '@/generator';
 import { fireBase } from '@/network/fireBase';
+import { Utils } from '@/utils/utils';
 
 type data = {
     players: Player[];
+    serverData: Player[];
     newPlayer: Player;
     isGenerate: boolean;
 };
@@ -127,35 +129,8 @@ export default defineComponent({
     name: 'Home',
     data: (): data => ({
         isGenerate: false,
-        players: [
-            {
-                fullName: 'Alex',
-                givesWish: 'iphone',
-                exceptionNames: [],
-                password: 'kjnk',
-                targetWish: '',
-                id: 0,
-                targetPlayerName: ''
-            },
-            {
-                fullName: 'Ann',
-                givesWish: 'iphone2',
-                exceptionNames: [],
-                password: 'kjnkdvs',
-                targetWish: '',
-                id: 1,
-                targetPlayerName: ''
-            },
-            {
-                fullName: 'Danya',
-                givesWish: 'iphone3',
-                exceptionNames: [],
-                password: '',
-                targetWish: '',
-                id: 2,
-                targetPlayerName: ''
-            }
-        ],
+        players: [],
+        serverData: [],
         newPlayer: {
             fullName: '',
             givesWish: '',
@@ -166,6 +141,14 @@ export default defineComponent({
             targetPlayerName: ''
         }
     }),
+    watch: {
+        players: {
+            handler() {
+                Utils.setLocalStorage('players', this.players);
+            },
+            deep: true
+        }
+    },
     methods: {
         addNewUser(event: Event): void {
             event.preventDefault();
@@ -194,6 +177,14 @@ export default defineComponent({
         },
         updateView(): void {
             setTimeout(M.AutoInit, 0);
+        },
+        async loadData(): Promise<any> {
+            const serverPlayers = await fireBase.get('players');
+            if (serverPlayers) this.serverData = JSON.parse(JSON.stringify(serverPlayers));
+            const localPlayers = Utils.getLocalStorage('players');
+            if (localPlayers) this.players = JSON.parse(JSON.stringify(localPlayers));
+            if (serverPlayers && !localPlayers) this.players = JSON.parse(JSON.stringify(localPlayers));
+            this.updateView();
         }
     },
     computed: {
@@ -207,7 +198,7 @@ export default defineComponent({
             this.$router.push('/');
             return;
         }
-        M.AutoInit();
+        this.loadData();
     }
 });
 </script>

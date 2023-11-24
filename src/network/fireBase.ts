@@ -1,10 +1,11 @@
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, UserCredential } from 'firebase/auth';
-import { getDatabase, ref, set } from 'firebase/database';
+import { getDatabase, ref, set, Database, get, child } from 'firebase/database';
 
 class FireBase {
     private _app: FirebaseApp;
     private _playerId: string | null = null;
+    private _database: Database;
     initialize(): void {
         this._app = initializeApp(this.getConfig());
     }
@@ -14,11 +15,26 @@ class FireBase {
         const user = await signInWithEmailAndPassword(auth, email, password).catch(error => console.error(error));
         if (!user) throw 'User not found';
         this._playerId = user.user.uid;
+        this._database = getDatabase(this._app);
         return user.user.getIdToken();
     }
     async post(data: any, path: string = ''): Promise<any> {
-        const db = getDatabase(this._app);
-        await set(ref(db, `users/${this._playerId}/${path}`), data);
+        try {
+            await set(ref(this._database, `users/${this._playerId}/${path}`), data);
+        } catch (err) {
+            console.error(err);
+            throw 'Data not sending';
+        }
+    }
+
+    async get(key: string): Promise<any> {
+        try {
+            const parent = ref(this._database);
+            return (await get(child(parent, `users/${this._playerId}/${key}`))).val();
+        } catch (err) {
+            console.error('Data not defined');
+            console.error(err);
+        }
     }
 
     get app(): FirebaseApp {

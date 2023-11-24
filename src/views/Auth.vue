@@ -69,7 +69,7 @@ export default defineComponent({
             }
             if (userToken) {
                 this.$router.push('home');
-                this.setUserToken(userToken);
+                await this.setUserToken(userToken);
             }
             this.isLoading = false;
         }
