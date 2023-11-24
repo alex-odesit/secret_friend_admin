@@ -3,9 +3,7 @@ module.exports = defineConfig({
     transpileDependencies: true,
     configureWebpack: {
         devServer: {
-            headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' },
-            compress: true,
-            disableHostCheck: true
+            headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' }
         }
     },
     publicPath: './',

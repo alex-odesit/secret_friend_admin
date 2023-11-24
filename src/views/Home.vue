@@ -211,7 +211,7 @@ export default defineComponent({
             if (serverPlayers) this.serverPlayers = JSON.parse(JSON.stringify(serverPlayers));
             const localPlayers = Utils.getLocalStorage('players');
             if (localPlayers) this.players = JSON.parse(JSON.stringify(localPlayers));
-            if (serverPlayers && !localPlayers) this.players = JSON.parse(JSON.stringify(localPlayers));
+            if (serverPlayers && !localPlayers) this.players = JSON.parse(JSON.stringify(serverPlayers));
             this.updateView();
             this.isLoadData = true;
         }
