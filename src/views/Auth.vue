@@ -50,8 +50,8 @@ export default defineComponent({
     name: 'Auth',
     data: (): data => ({
         form: {
-            email: 'alex@gmail.com',
-            password: 'testtest'
+            email: '',
+            password: ''
         },
         isLoading: false,
         isValid: true
