@@ -15,7 +15,12 @@
 
                 <div class="user__name user__node">
                     <div class="input-field">
-                        <input v-model="player.fullName" id="first_name" type="text" class="validate white-text" />
+                        <input
+                            disabled
+                            v-model="player.fullName"
+                            id="first_name"
+                            type="text"
+                            class="validate white-text" />
                         <label class="green-text" :class="{ active: player.fullName }" for="first_name"
                             >First Name</label
                         >
