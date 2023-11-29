@@ -7,6 +7,10 @@ class Utils {
         }
     }
 
+    static copy(data: any): any {
+        return JSON.parse(JSON.stringify(data));
+    }
+
     static getLocalStorage(key: string): any {
         const data = localStorage.getItem(key);
         if (data) return JSON.parse(data);

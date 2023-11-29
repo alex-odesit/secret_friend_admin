@@ -53,6 +53,14 @@ export class Generator {
         player.exceptionNames.splice(index, 1);
     }
 
+    static updatePlayers(players: Player[]): Player[] {
+        return players.map(player => {
+            const targetPlayer = <Player>players.find(p => p.fullName === player.targetPlayerName);
+            player.targetWish = targetPlayer.givesWish;
+            return player;
+        });
+    }
+
     /**
      * @return [player, targetPlayer][]
      */

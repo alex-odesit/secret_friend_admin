@@ -112,7 +112,11 @@
                         <span class="btn__wave"></span>
                         <span class="btn__text">reset</span>
                     </button>
-                    <div v-if="isGenerate" class="progress">
+                    <button v-if="isNeedUpdate" class="btn__wave_box btn__wave_box-update" @click="update">
+                        <span class="btn__wave"></span>
+                        <span class="btn__text">update</span>
+                    </button>
+                    <div v-if="isShowLoader" class="progress">
                         <div class="indeterminate"></div>
                     </div>
                 </div>
@@ -134,7 +138,7 @@ type data = {
     players: Player[];
     serverPlayers: Player[];
     newPlayer: Player;
-    isGenerate: boolean;
+    isShowLoader: boolean;
     isLoadData: boolean;
 };
 
@@ -142,7 +146,7 @@ export default defineComponent({
     name: 'Home',
     components: { Preloader },
     data: (): data => ({
-        isGenerate: false,
+        isShowLoader: false,
         players: [],
         serverPlayers: [],
         isLoadData: false,
@@ -182,18 +186,25 @@ export default defineComponent({
             this.updateView();
         },
         async generate(): Promise<any> {
-            if (this.isGenerate || !this.isNeedReset) return;
-            this.isGenerate = true;
+            if (this.isShowLoader || !this.isNeedReset) return;
+            this.isShowLoader = true;
             const generator = new Generator(...JSON.parse(JSON.stringify(this.players)));
             this.players = generator.getGameResult().sort((a, b) => a.id - b.id);
             await fireBase.post(this.players, 'players/');
-            this.isGenerate = false;
+            this.isShowLoader = false;
             this.serverPlayers = JSON.parse(JSON.stringify(this.players));
             this.updateView();
         },
         reset(): void {
             this.players = JSON.parse(JSON.stringify(this.serverPlayers));
             this.updateView();
+        },
+        async update(): Promise<any> {
+            this.isShowLoader = true;
+            this.players = Generator.updatePlayers(this.players);
+            await fireBase.post(this.players, 'players/');
+            this.serverPlayers = Utils.copy(this.players);
+            this.isShowLoader = false;
         },
         updateView(): void {
             setTimeout(M.AutoInit, 0);
@@ -223,6 +234,9 @@ export default defineComponent({
         },
         isNeedReset(): boolean {
             return JSON.stringify(this.players) !== JSON.stringify(this.serverPlayers);
+        },
+        isNeedUpdate(): boolean {
+            return this.isNeedReset && this.serverPlayers.length === this.players.length;
         }
     },
     mounted() {
@@ -401,6 +415,12 @@ $size: 200px;
 .btn__wave_box-reset {
     & .btn__wave {
         background: linear-gradient(45deg, #bc0000, #d029e2);
+    }
+}
+
+.btn__wave_box-update {
+    & .btn__wave {
+        background: linear-gradient(45deg, #55bc00, #29c6e2);
     }
 }
 
